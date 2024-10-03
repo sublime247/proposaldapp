@@ -1,35 +1,42 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import Layout from "./components/Layout";
+import CreateProposalModal from "./components/CreateProposalModal";
+import Proposals from "./components/Proposals";
+import useContract from "./hooks/useContract";
+import useRunners from "./hooks/useRunners";
+import useProposals from "./hooks/useProposals";
+import useModal from "./hooks/useModal";
+import { Modal } from "./components/Modal";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const readOnlyProposalContract = useContract(true);
+  const { readOnlyProvider } = useRunners();
+  const { proposals, fetchProposals } = useProposals(
+    readOnlyProposalContract,
+    readOnlyProvider
+  );
+  const { isModalOpen, openModal, closeModal } = useModal();
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+    <Layout>
+      <div className="w-full flex my-5">
+        <button
+          className="bg-blue-500 p-4 text-white shadow-md rounded-md"
+          onClick={openModal}
+        >
+          Create Proposal
         </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+      <Modal
+        handleClose={closeModal}
+        isOpen={isModalOpen}
+        isSuccessModal
+        title="Create Proposal"
+      >
+        <CreateProposalModal closeModal={closeModal} refetch={fetchProposals} />
+      </Modal>
+      <Proposals proposals={proposals} />
+    </Layout>
+  );
 }
 
-export default App
+export default App;
